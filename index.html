@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>IQテスト</title>
+<title>一般常識テスト</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700;900&family=M+PLUS+Rounded+1c:wght@400;700&display=swap" rel="stylesheet">
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -57,6 +57,14 @@
   .cdown-wrap { margin-top:24px; display:none; }
   .cdown-bar { height:6px; background:#eee; border-radius:99px; overflow:hidden; }
   .cdown-fill { height:100%; background:linear-gradient(90deg,#4caf50,#ffeb3b,#f44336); border-radius:99px; width:100%; }
+
+  /* 黒画面オーバーレイ */
+  #blackout {
+    position: fixed; inset: 0; z-index: 9000;
+    background: #000; opacity: 0; pointer-events: none;
+    transition: opacity 0.3s ease;
+  }
+  #blackout.fade-in  { opacity: 1; pointer-events: all; }
 
   #scare {
     display:none; position:fixed; inset:0; z-index:9999;
@@ -130,8 +138,8 @@
 <body>
 
 <header>
-  <h1>IQテスト</h1>
-  <p>科学的根拠に基づいた知能指数測定テスト（全5問）</p>
+  <h1>一般常識テスト</h1>
+  <p>義務教育ででてくる問題です（全5問）</p>
 </header>
 
 <div class="progress-wrap">
@@ -156,6 +164,7 @@
   </div>
 </div>
 
+<div id="blackout"></div>
 <div id="flash"></div>
 
 <div id="scare">
@@ -176,21 +185,18 @@ const HORROR_IMAGES = [
 ];
 
 const IMG_SWITCH_MS = 100;
-
 const SCARE_ON_QUESTION = 3;
-
 const SCARE_DELAY_SEC = 4;
-
 
 const questions = [
   {
-    q: "次のうち、日本で一番高い山はどれ？",
-    choices: ["富士山","北岳","奥穂高岳","槍ヶ岳"],
+    q: "次の漢字の読み方として正しいものを選びなさい。",
+    choices: ["慈悲深い（じひぶかい）","慈悲深い（じびぶかい）","慈悲深い（じみぶかい）","慈悲深い（しひぶかい）"],
     ans: 0
   },
   {
-    q: "1 × 0 = ？",
-    choices: ["0","1","10","−1"],
+    q: "次のうち、植物の体内で起こる反応はどれですか。",
+    choices: ["光合成","発酵","消化","蒸発"],
     ans: 0
   },
   {
@@ -204,9 +210,9 @@ const questions = [
     ans: 2
   },
   {
-    q: "最後の問題です！\nこの画面をじっと見つめながら\n答えを選んでください...",
-    choices: ["楽しみ！","ドキドキ","早く！","準備OK"],
-    ans: 0
+    q: "2019年10月1日に消費税率が8%から引き上げられましたが、引き上げ後の税率は何%ですか。",
+    choices: ["5%","8%","10%","12%"],
+    ans: 2
   }
 ];
 
@@ -223,7 +229,6 @@ function preloadImages() {
   const container = document.getElementById('scare-imgs');
   container.innerHTML = '';
   validImgs = [];
-
   HORROR_IMAGES.forEach(src => {
     const img = document.createElement('img');
     img.className = 'scare-img';
@@ -231,10 +236,7 @@ function preloadImages() {
     img.alt = '';
     img.draggable = false;
     container.appendChild(img);
-
-    img.onload = () => {
-      if (!validImgs.includes(img)) validImgs.push(img);
-    };
+    img.onload = () => { if (!validImgs.includes(img)) validImgs.push(img); };
   });
 }
 preloadImages();
@@ -276,7 +278,6 @@ function renderQuestion() {
       fill.style.transition = `width ${SCARE_DELAY_SEC}s linear`;
       fill.style.width = '0%';
     }, 80);
-
     scareTimer = setTimeout(triggerScare, SCARE_DELAY_SEC * 1000);
   }
 }
@@ -298,7 +299,10 @@ function handleAnswer(idx, btn) {
 
   if (current + 1 === SCARE_ON_QUESTION) {
     clearTimeout(scareTimer);
-    setTimeout(triggerScare, 400);
+    setTimeout(() => {
+      document.getElementById('blackout').classList.add('fade-in');
+      setTimeout(triggerScare, 1500);
+    }, 400);
     return;
   }
 
@@ -439,6 +443,7 @@ function resetAll() {
   audio.currentTime = 0;
   stopScarySound();
 
+  document.getElementById('blackout').classList.remove('fade-in');
   document.getElementById('scare').classList.remove('active');
   document.getElementById('scare-fallback').classList.remove('show');
   document.getElementById('reset-btn').style.display = 'none';
