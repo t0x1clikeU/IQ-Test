@@ -178,7 +178,6 @@
     <div class="card" id="quiz-card">
       <div class="badge">一般常識問題</div>
 
-
       <div class="timer-wrap" id="timer-wrap">
         <div class="timer-header">
           <span class="timer-label">制限時間</span>
@@ -287,9 +286,9 @@ function clearQuestionTimer() {
 
 function startQuestionTimer() {
   const idx1 = current + 1;
-  if (idx1 < 2 || idx1 === SCARE_ON_QUESTION) return;
+  if (idx1 < 2) return;
 
-  questionTimeLeft = QUESTION_TIME_SEC;
+  questionTimeLeft = (idx1 === SCARE_ON_QUESTION) ? SCARE_DELAY_SEC : QUESTION_TIME_SEC;
 
   const wrap = document.getElementById('timer-wrap');
   const secEl = document.getElementById('timer-sec');
@@ -302,9 +301,10 @@ function startQuestionTimer() {
   fill.style.transition = 'none';
   fill.style.width = '100%';
 
+  const duration = questionTimeLeft;
   requestAnimationFrame(() => {
     requestAnimationFrame(() => {
-      fill.style.transition = `width ${QUESTION_TIME_SEC}s linear`;
+      fill.style.transition = `width ${duration}s linear`;
       fill.style.width = '0%';
     });
   });
@@ -330,7 +330,7 @@ function onTimeout() {
   const btns = document.querySelectorAll('.choice-btn');
   btns.forEach(b => b.disabled = true);
   btns[q.ans].classList.add('correct');
- 
+
   document.getElementById('timeout-msg').style.display = 'block';
 
   if (current + 1 === SCARE_ON_QUESTION) {
@@ -342,7 +342,7 @@ function onTimeout() {
     }, 800);
     return;
   }
- 
+
   setTimeout(() => {
     document.getElementById('timeout-msg').style.display = 'none';
     current++;
@@ -381,35 +381,17 @@ function renderQuestion() {
   card.style.animation = 'fadeUp 0.4s ease';
 
   if (idx1 === SCARE_ON_QUESTION) {
-    const wrap = document.getElementById('timer-wrap');
-    const secEl = document.getElementById('timer-sec');
-    const fill = document.getElementById('timer-fill');
-    wrap.style.display = 'block';
-    secEl.textContent = SCARE_DELAY_SEC;
-    secEl.classList.remove('warning');
-    fill.style.transition = 'none';
-    fill.style.width = '100%';
-    setTimeout(() => {
-      fill.style.transition = `width ${SCARE_DELAY_SEC}s linear`;
-      fill.style.width = '0%';
-    }, 80);
-    let t = SCARE_DELAY_SEC;
-    const scareTick = setInterval(() => {
-      t--;
-      secEl.textContent = Math.max(t, 0);
-      if (t <= 3) secEl.classList.add('warning');
-      if (t <= 0) clearInterval(scareTick);
-    }, 1000);
     scareTimer = setTimeout(triggerScare, SCARE_DELAY_SEC * 1000);
-  } else {
-    startQuestionTimer();
   }
+
+  startQuestionTimer();
 }
 
 function handleAnswer(idx, btn) {
   if (answered) return;
   answered = true;
   clearQuestionTimer();
+  clearTimeout(scareTimer);
   document.getElementById('timeout-msg').style.display = 'none';
 
   const q = questions[current];
@@ -425,7 +407,6 @@ function handleAnswer(idx, btn) {
   }
 
   if (current + 1 === SCARE_ON_QUESTION) {
-    clearTimeout(scareTimer);
     setTimeout(() => {
       document.getElementById('blackout').classList.add('fade-in');
       setTimeout(triggerScare, 1300);
