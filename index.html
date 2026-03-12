@@ -325,7 +325,7 @@ function startQuestionTimer() {
 function onTimeout() {
   if (answered) return;
   answered = true;
-
+　clearTimeout(scareTimer);
   const q = questions[current];
   const btns = document.querySelectorAll('.choice-btn');
   btns.forEach(b => b.disabled = true);
