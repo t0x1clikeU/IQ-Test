@@ -178,7 +178,6 @@
 const HORROR_IMAGES = ['img/1.jpg'];
 const IMG_SWITCH_MS = 100;
 const SCARE_ON_QUESTION = 3;
-const SCARE_DELAY_SEC = 10;
 
 const questions = [
   {
@@ -211,7 +210,6 @@ const questions = [
 let current = 0;
 let score = 0;
 let answered = false;
-let scareTimer = null;
 let imgInterval = null;
 let imgCursor = 0;
 let validImgs = [];
@@ -236,7 +234,6 @@ preloadImages();
 function renderQuestion() {
   const q = questions[current];
   answered = false;
-  clearTimeout(scareTimer);
 
   const idx1 = current + 1;
   document.getElementById('q-num').textContent = `問題 ${idx1}`;
@@ -258,19 +255,11 @@ function renderQuestion() {
   card.style.animation = 'none';
   void card.offsetWidth;
   card.style.animation = 'fadeUp 0.4s ease';
-
-  if (idx1 === SCARE_ON_QUESTION) {
-    scareTimer = setTimeout(() => {
-      document.getElementById('blackout').classList.add('fade-in');
-      setTimeout(triggerScare, 1300);
-    }, SCARE_DELAY_SEC * 1000);
-  }
 }
 
 function handleAnswer(idx, btn) {
   if (answered) return;
   answered = true;
-  clearTimeout(scareTimer);
 
   const q = questions[current];
   document.querySelectorAll('.choice-btn').forEach(b => b.disabled = true);
@@ -299,8 +288,6 @@ function handleAnswer(idx, btn) {
 }
 
 function triggerScare() {
-  clearTimeout(scareTimer);
-
   const flash = document.getElementById('flash');
   flash.classList.remove('pop');
   void flash.offsetWidth;
@@ -417,7 +404,6 @@ function resetAll() {
   current = 0;
   score = 0;
   answered = false;
-  clearTimeout(scareTimer);
   clearInterval(imgInterval);
   imgInterval = null;
   imgCursor = 0;
